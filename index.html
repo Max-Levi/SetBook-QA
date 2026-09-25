@@ -632,7 +632,7 @@
   .filters-clear{ flex-shrink:0; }
   .filters-clear[hidden]{ display:none; }
   /* Expand/Collapse live outside the panel, always reachable. */
-  .expand-collapse-row{ margin-bottom:9px; }
+  .expand-collapse-row{ margin-top:12px; margin-bottom:9px; }
   /* Per-dropdown clear buttons: each appears only while its dropdown has a
      selection; the row stretches the button to the select's height. */
   .filter-select-row{ display:flex; gap:8px; align-items:stretch; }
@@ -1480,7 +1480,7 @@
           <h3>8. File management</h3>
           <ul>
             <li>Libraries are stored as <code>.json</code> files. In browsers that support the File System Access API (Chrome, Edge), SetBook opens a file by handle and autosaves back to it as you work; a default folder can be linked for quicker access. Other browsers (Safari, Firefox) fall back to explicit open and save-as download flows.</li>
-            <li>Crash recovery: every change is also snapshotted (debounced) to the browser's localStorage. If the app restarts with unsaved work — after a crash, or a tab closed on a browser without the File System Access API — the welcome screen offers to restore it ("Pick up where you left off?") or start fresh. When a recovery snapshot is offered, the welcome modal switches to a compact layout — the feature tour is hidden so the recovery banner and the file buttons fit without scrolling (choosing "Start fresh" keeps the compact layout; the recovery buttons are 44px touch targets on mobile). The banner names the file the work was last linked to, and restoring re-links it automatically (the handle is kept in the browser's IndexedDB; the browser may ask for permission once, and the restore click counts as the gesture that allows the prompt). Before the restored work is written back, the file's current on-disk contents are kept as a "Before re-linking…" snapshot, so the overwrite stays undoable via Snapshots. If permission is denied or the file moved, the work still restores — just unlinked.</li>
+            <li>Crash recovery: every change is also snapshotted (debounced) to the browser's localStorage. If the app restarts with unsaved work — after a crash, or a tab closed on a browser without the File System Access API — the welcome screen offers to restore it ("Pick up where you left off?") or start fresh. The offer is suppressed when the last-linked file on disk was edited more recently than the auto-saved data — restoring would overwrite the newer file with old browser data — and the restore click re-checks the file's age, refusing with an explanatory message if the file changed since boot. When a recovery snapshot is offered, the welcome modal switches to a compact layout — the feature tour is hidden so the recovery banner and the file buttons fit without scrolling (choosing "Start fresh" keeps the compact layout; the recovery buttons are 44px touch targets on mobile). The banner names the file the work was last linked to, and restoring re-links it automatically (the handle is kept in the browser's IndexedDB; the browser may ask for permission once, and the restore click counts as the gesture that allows the prompt). Before the restored work is written back, the file's current on-disk contents are kept as a "Before re-linking…" snapshot, so the overwrite stays undoable via Snapshots. If permission is denied or the file moved, the work still restores — just unlinked.</li>
             <li>Snapshots: File → Snapshots… keeps session-scoped backups of the library (in memory only — they do not survive a reload). One is taken automatically every time a file is loaded — both the outgoing work ("Before opening X") and the loaded file ("Opened X") — plus on crash-recovery restore, before New file, and manually via "Take snapshot" (newest first, capped at 12). Each snapshot can be compared against what's currently open ("A → B" diff: added/removed songs, renames, Ready/type changes, added/removed sections, +N/−N rows per section, and section renames), the open library can be compared against another JSON file on disk, and any snapshot can be restored — the pre-restore state is snapshotted first so restoring is undoable, and the linked file binding is kept. Empty songs (no lyric/chord content and no real name, e.g. a fresh session's "Untitled song") are never listed, so placeholders don't pollute the diff.</li>
             <li>The File menu is grouped under small labels: File (New file, Open…, Save as…, Snapshots…, Export filtered songs…), Folders (Set folder…, Open enclosing folder…), Songs (Import songs), Settings (Configuration…). The Save as… item shows its Ctrl/Cmd+S shortcut hint, and the header Export PDF button shows Ctrl/Cmd+E (hidden at phone width where the button truncates).</li>
             <li>Export filtered songs: File → Export filtered songs… downloads a JSON containing just the songs currently visible in the sidebar — the Cover/Original, Ready/Not ready, tag, and artist filters, plus the search box when it has text. The menu item shows a live count of what will be exported; if nothing matches, a toast explains that instead of downloading an empty file. The download is named after the open file with a " (filtered)" suffix, and the open file (including its linked file handle) is left untouched. The export is a standalone library: filters are reset so everything in it shows, saved PDF setlists are pruned to the exported songs (emptied ones are dropped), section display names are re-stamped against the exported sections, and tags are carried over with each song. It does not count as a backup for the backup reminder — only a full save does.</li>
@@ -1533,7 +1533,7 @@
             <li><strong>Snapshots & diff:</strong> open File → Snapshots… and confirm a snapshot exists for the last file load; take a manual snapshot, edit a song (add a row, rename, toggle Ready), then Compare the earlier snapshot against Current and confirm the diff lists the changes; restore the earlier snapshot (confirm the popover) and confirm the edits are gone while a "Before restoring…" snapshot was kept; use "Compare with a file…" on another JSON and confirm added/removed songs appear.</li>
             <li><strong>Narrow layout (mobile UX):</strong> at phone width (≤760px) the sidebar is a drawer opened by the 44px hamburger button and closes when a section, search result, or "+ Add section" is chosen (it stays open while naming a new song); header icon buttons and modal action buttons meet the 44px touch target; the welcome and PDF modals use the compact mobile styling with no horizontal overflow; row icon buttons collapse into a ⋯ menu with labeled actions; the PDF dialog keeps Generate visible in a sticky footer; the hint row wraps instead of colliding with the Clear pills; the preview paper scrolls horizontally instead of clipping; no console errors.</li>
           </ul>
-          <p><strong>C. Record the result.</strong> Note what was checked, the date, and any failures or limitations (e.g. a CDN dependency being unreachable in the test environment). Automated Playwright scripts covering the browser pass live alongside this checklist: <code>setbook-qa/regression-test.js</code> (56 checks), <code>setbook-qa/section-names-test.js</code> (32 checks), <code>setbook-qa/ux-top5-test.js</code> (28 checks), <code>setbook-qa/row-drag-test.js</code> (24 checks), <code>setbook-qa/polish4-test.js</code> (22 checks), <code>setbook-qa/mobile-drawer-test.js</code> (14 checks), <code>setbook-qa/snapshot-test.js</code> (33 checks), <code>setbook-qa/pdf-toc-links-test.js</code> (10 checks), <code>setbook-qa/tag-filter-test.js</code> (18 checks), <code>setbook-qa/export-filtered-test.js</code> (12 checks), <code>setbook-qa/song-details-test.js</code> (27 checks), <code>setbook-qa/pdf-redownload-test.js</code> (11 checks), and <code>setbook-qa/recovery-relink-test.js</code> (13 checks), <code>setbook-qa/filter-panel-test.js</code> (68 checks), <code>setbook-qa/pull-refresh-test.js</code> (12 checks), <code>setbook-qa/welcome-compact-test.js</code> (13 checks), and <code>setbook-qa/section-numbering-test.js</code> (18 checks) — 20 suites, 465 checks in total. A refactor that changes no user-visible behavior does not require a documentation update beyond this checklist's own "Last updated" date.</p>
+          <p><strong>C. Record the result.</strong> Note what was checked, the date, and any failures or limitations (e.g. a CDN dependency being unreachable in the test environment). Automated Playwright scripts covering the browser pass live alongside this checklist: <code>setbook-qa/regression-test.js</code> (56 checks), <code>setbook-qa/section-names-test.js</code> (32 checks), <code>setbook-qa/ux-top5-test.js</code> (28 checks), <code>setbook-qa/row-drag-test.js</code> (24 checks), <code>setbook-qa/polish4-test.js</code> (22 checks), <code>setbook-qa/mobile-drawer-test.js</code> (14 checks), <code>setbook-qa/snapshot-test.js</code> (33 checks), <code>setbook-qa/pdf-toc-links-test.js</code> (10 checks), <code>setbook-qa/tag-filter-test.js</code> (18 checks), <code>setbook-qa/export-filtered-test.js</code> (12 checks), <code>setbook-qa/song-details-test.js</code> (27 checks), <code>setbook-qa/pdf-redownload-test.js</code> (11 checks), and <code>setbook-qa/recovery-relink-test.js</code> (13 checks), <code>setbook-qa/filter-panel-test.js</code> (68 checks), <code>setbook-qa/pull-refresh-test.js</code> (12 checks), <code>setbook-qa/welcome-compact-test.js</code> (13 checks), <code>setbook-qa/section-numbering-test.js</code> (18 checks), and <code>setbook-qa/recovery-stale-test.js</code> (11 checks) — 21 suites, 476 checks in total. A refactor that changes no user-visible behavior does not require a documentation update beyond this checklist's own "Last updated" date.</p>
         </section>
       </div>
     </div>
@@ -2995,7 +2995,7 @@ function renderMain(){
           ${SECTION_TYPES.map(t => `<option value="${t.id}"${t.id === nameType ? ' selected' : ''}>${t.label}</option>`).join('')}
         </select>
         <input class="section-custom-input" placeholder="Custom name" value="${escapeAttr(sec.customName || '')}"${nameType === 'custom' ? '' : ' style="display:none"'}>
-        <input class="section-suffix-input" placeholder="Label, e.g. (guitar solo)" value="${escapeAttr(sec.nameSuffix || '')}" title="Informational label shown after the section name">
+        <input class="section-suffix-input" placeholder="Suffix, e.g. (guitar solo)" value="${escapeAttr(sec.nameSuffix || '')}" title="Extra text appended after the section name">
       </div>
       <div class="section-name-preview">Shows as: <strong>${escapeHtml(displaySectionName(sec))}</strong></div>
     </div>
@@ -4020,13 +4020,36 @@ function recoveryHasContent(s){
   return (s.sectionGroups || []).some(g => (g.name || '').trim() || (g.artist || '').trim()) ||
          (s.sections || []).some(sec => (sec.lines || []).some(l => (l.text || '').trim() || (l.symbols || []).length));
 }
+// True when the last-linked file on disk was modified after the recovery
+// snapshot was saved — restoring the snapshot would clobber newer work
+// with old data from the browser. Resolves null when there is no linked
+// file or the file's age can't be determined without prompting (the
+// click-time check below runs with a user gesture, so it may prompt).
+async function isDiskFileNewerThanSnapshot(snap, allowPrompt){
+  try{
+    const rec = await readPersistedFileHandle();
+    if (!rec || !rec.handle || typeof rec.handle.queryPermission !== 'function') return null;
+    let perm = await rec.handle.queryPermission({ mode: 'read' });
+    if (perm !== 'granted' && allowPrompt && typeof rec.handle.requestPermission === 'function'){
+      try{ perm = await rec.handle.requestPermission({ mode: 'read' }); }catch(err){ /* denied */ }
+    }
+    if (perm !== 'granted') return null;
+    const file = await rec.handle.getFile();
+    if (!file || typeof file.lastModified !== 'number') return null;
+    return file.lastModified > snap.savedAt;
+  }catch(err){ return null; }
+}
 // At boot, offer to restore the last session's work inside the welcome
 // modal — the one gate every launch passes through.
+// The offer is suppressed when the linked file on disk is newer than the
+// snapshot: the browser copy is stale, and restoring it would overwrite
+// the newer file. The snapshot is left in place, nothing is deleted.
 // Set when the person restores a recovery snapshot at boot.
 let recoveryRestoredThisBoot = false;
 async function maybeOfferRecovery(){
   const snap = readRecoverySnapshot();
   if (!snap || !recoveryHasContent(snap.state)) return;
+  if (await isDiskFileNewerThanSnapshot(snap, false)) return;
   const when = new Date(snap.savedAt).toLocaleString(undefined, { weekday:'short', hour:'numeric', minute:'2-digit' });
   const ctaLabel = document.querySelector('#welcomeModalOverlay .welcome-cta-label');
   if (!ctaLabel) return;
@@ -4049,6 +4072,15 @@ async function maybeOfferRecovery(){
   if (welcomeModalEl) welcomeModalEl.classList.add('welcome-compact');
   banner.querySelector('#recoveryRestoreBtn').addEventListener('click', async () => {
     try{
+      // Last-second guard: the file may have been edited since boot, or we
+      // couldn't verify at boot without prompting. Never restore stale
+      // browser data over a newer file — the click is the gesture that
+      // allows the permission prompt.
+      if (await isDiskFileNewerThanSnapshot(snap, true)){
+        banner.remove();
+        showToast('The file on disk is newer than the auto-saved data — open it directly to keep the newest work.');
+        return;
+      }
       loadParsedState(JSON.parse(JSON.stringify(snap.state)));
       takeSnapshot('Recovered session');
       recoveryRestoredThisBoot = true;
